@@ -103,7 +103,7 @@ func single_threaded(files []string) {
 
 func multi_threaded(files []string) {
 	// TODO: Your multi-threaded implementation
-	num_threads := 2
+	num_threads := 3
 	size := 0
 
 	// Get the total size of the files
@@ -119,14 +119,39 @@ func multi_threaded(files []string) {
 	// Determine the size of the string that each thread will handle
 	size_per_thread := size / num_threads
 	log.Printf("Size: %d", size_per_thread)
+	bytes_per_thread := int64(1000000)
 
 	// Split the file into strings with size_per_thread bytes in each
+	for _, filePath := range files {
+		Myfile, err := os.Open(filePath)
+		if err != nil {
+			fmt.Println(err)
+		}
+		file, err := os.Stat(filePath)
+		if err != nil {
+			log.Printf("Error with determining file %s: %v", filePath, err)
+		}
+		myReader := bufio.NewReader(Myfile)
+		for i := 0; i < int(file.Size()); i += int(bytes_per_thread) {
+			Myfile.Seek(int64(i), 0)
+
+			buffer := make(string, bytes_per_thread)
+			bytes, err := Myfile.Read(buffer)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print(string(bytes))
+			log.Print(myReader)
+
+		}
+	}
 
 }
 
 func main() {
 	// TODO: add argument processing and run both single-threaded and multi-threaded functions
 	files := read("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input")
+	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// single_threaded(files)
 	multi_threaded(files)
 	// multi_threaded(files)
