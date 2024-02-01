@@ -119,7 +119,9 @@ func multi_threaded(files []string) {
 	// Determine the size of the string that each thread will handle
 	size_per_thread := size / num_threads
 	log.Printf("Size: %d", size_per_thread)
-	bytes_per_thread := int64(1000000)
+	bytes_per_thread := int64(1250000)
+
+	var strings []string
 
 	// Split the file into strings with size_per_thread bytes in each
 	for _, filePath := range files {
@@ -131,20 +133,23 @@ func multi_threaded(files []string) {
 		if err != nil {
 			log.Printf("Error with determining file %s: %v", filePath, err)
 		}
-		myReader := bufio.NewReader(Myfile)
+		// myReader := bufio.NewReader(Myfile)
+
 		for i := 0; i < int(file.Size()); i += int(bytes_per_thread) {
 			Myfile.Seek(int64(i), 0)
 
-			buffer := make(string, bytes_per_thread)
-			bytes, err := Myfile.Read(buffer)
+			buffer := make([]byte, bytes_per_thread)
+			n, err := Myfile.Read(buffer)
 			if err != nil {
 				log.Fatal(err)
 			}
-			log.Print(string(bytes))
-			log.Print(myReader)
+
+			strings = append(strings, string(buffer[:n]))
 
 		}
 	}
+	fmt.Println(strings)
+	fmt.Println(len(strings))
 
 }
 
