@@ -11,6 +11,10 @@ import (
 	"strings"
 )
 
+var num_threads = 3
+var size = 0
+var wordCount = make(map[string]int)
+
 func read(path string) []string {
 	var files []string
 
@@ -103,9 +107,6 @@ func single_threaded(files []string) {
 
 func multi_threaded(files []string) {
 	// TODO: Your multi-threaded implementation
-	num_threads := 3
-	size := 0
-
 	// Get the total size of the files
 	for _, filePath := range files {
 		// Get the file size
@@ -151,10 +152,13 @@ func multi_threaded(files []string) {
 	fmt.Println(strings)
 	fmt.Println(len(strings))
 
+	//test
+
 }
 
 func main() {
 	// TODO: add argument processing and run both single-threaded and multi-threaded functions
+
 	files := read("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// single_threaded(files)
