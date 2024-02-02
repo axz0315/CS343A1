@@ -14,8 +14,9 @@ import (
 var num_threads = 3
 var size = 0
 var wordCount = make(map[string]int)
+var threadInput []string
 
-func read(path string) []string {
+func readFilesFromFolder(path string) []string {
 	var files []string
 
 	// Open the directory
@@ -55,10 +56,28 @@ func cleanAndSplit(text string) []string {
 	return words
 }
 
+func generateOutputFile() {
+	// Sort the words alphabetically
+	var words []string
+	for word := range wordCount {
+		words = append(words, word)
+	}
+	sort.Strings(words)
+
+	// Write the word count to the output file
+	outputFile, err := os.Create("output/single.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer outputFile.Close()
+
+	for _, word := range words {
+		outputFile.WriteString(fmt.Sprintf("%s %d\n", word, wordCount[word]))
+	}
+}
+
 func single_threaded(files []string) {
 	// initializes a map which will keep track of strings and the number of occurences of that string
-	wordCounts := make(map[string]int)
-
 	// Process each file
 	for _, filePath := range files {
 		// Open the file
@@ -77,7 +96,7 @@ func single_threaded(files []string) {
 
 			// Update word frequency count
 			for _, word := range words {
-				wordCounts[word]++
+				wordCount[word]++
 			}
 		}
 
@@ -86,43 +105,25 @@ func single_threaded(files []string) {
 		}
 	}
 
-	// Sort the words alphabetically
-	var words []string
-	for word := range wordCounts {
-		words = append(words, word)
-	}
-	sort.Strings(words)
-
-	// Write the word count to the output file
-	outputFile, err := os.Create("output/single.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer outputFile.Close()
-
-	for _, word := range words {
-		outputFile.WriteString(fmt.Sprintf("%s %d\n", word, wordCounts[word]))
-	}
+	generateOutputFile()
 }
 
 func multi_threaded(files []string) {
 	// TODO: Your multi-threaded implementation
 	// Get the total size of the files
-	for _, filePath := range files {
-		// Get the file size
-		file, err := os.Stat(filePath)
-		if err != nil {
-			log.Printf("Error with determining file %s: %v", filePath, err)
-		}
-		// get the size
-		size += int(file.Size())
-	}
-	// Determine the size of the string that each thread will handle
-	size_per_thread := size / num_threads
-	log.Printf("Size: %d", size_per_thread)
+	// for _, filePath := range files {
+	// 	// Get the file size
+	// 	file, err := os.Stat(filePath)
+	// 	if err != nil {
+	// 		log.Printf("Error with determining file %s: %v", filePath, err)
+	// 	}
+	// 	// get the size
+	// 	size += int(file.Size())
+	// }
+	// size_per_thread := size / num_threads
+	// log.Printf("Size: %d", size_per_thread)
+	// Set the size of the string that each thread will handle
 	bytes_per_thread := int64(1250000)
-
-	var strings []string
 
 	// Split the file into strings with size_per_thread bytes in each
 	for _, filePath := range files {
@@ -145,21 +146,19 @@ func multi_threaded(files []string) {
 				log.Fatal(err)
 			}
 
-			strings = append(strings, string(buffer[:n]))
+			threadInput = append(threadInput, string(buffer[:n]))
 
 		}
 	}
-	fmt.Println(strings)
-	fmt.Println(len(strings))
-
-	//test
+	// fmt.Println(threadInput)
+	// fmt.Println(len(threadInput))
 
 }
 
 func main() {
 	// TODO: add argument processing and run both single-threaded and multi-threaded functions
 
-	files := read("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input")
+	files := readFilesFromFolder("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	single_threaded(files)
 	// multi_threaded(files)
