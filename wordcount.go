@@ -47,6 +47,7 @@ func readFilesFromFolder(path string) []string {
 }
 
 // Function to clean and split text into words
+// can happen at same time
 func cleanAndSplit(text string) []string {
 	re := regexp.MustCompile(`[[:alnum:]]+`)
 	words := re.FindAllString(text, -1)
@@ -54,6 +55,14 @@ func cleanAndSplit(text string) []string {
 		words[i] = strings.ToLower(words[i])
 	}
 	return words
+}
+
+// critical
+func fillHashMap(words []string) {
+	// Update word frequency count
+	for _, word := range words {
+		wordCount[word]++
+	}
 }
 
 func generateOutputFile() {
@@ -95,9 +104,7 @@ func single_threaded(files []string) {
 			words := cleanAndSplit(scanner.Text())
 
 			// Update word frequency count
-			for _, word := range words {
-				wordCount[word]++
-			}
+			fillHashMap(words)
 		}
 
 		if err := scanner.Err(); err != nil {
@@ -109,19 +116,6 @@ func single_threaded(files []string) {
 }
 
 func multi_threaded(files []string) {
-	// TODO: Your multi-threaded implementation
-	// Get the total size of the files
-	// for _, filePath := range files {
-	// 	// Get the file size
-	// 	file, err := os.Stat(filePath)
-	// 	if err != nil {
-	// 		log.Printf("Error with determining file %s: %v", filePath, err)
-	// 	}
-	// 	// get the size
-	// 	size += int(file.Size())
-	// }
-	// size_per_thread := size / num_threads
-	// log.Printf("Size: %d", size_per_thread)
 	// Set the size of the string that each thread will handle
 	bytes_per_thread := int64(1250000)
 
@@ -135,7 +129,6 @@ func multi_threaded(files []string) {
 		if err != nil {
 			log.Printf("Error with determining file %s: %v", filePath, err)
 		}
-		// myReader := bufio.NewReader(Myfile)
 
 		for i := 0; i < int(file.Size()); i += int(bytes_per_thread) {
 			Myfile.Seek(int64(i), 0)
@@ -150,9 +143,6 @@ func multi_threaded(files []string) {
 
 		}
 	}
-	// fmt.Println(threadInput)
-	// fmt.Println(len(threadInput))
-
 }
 
 func main() {
