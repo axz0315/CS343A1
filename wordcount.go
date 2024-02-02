@@ -45,19 +45,19 @@ func read(path string) []string {
 	return files
 }
 
+// Function to clean and split text into words
+func cleanAndSplit(text string) []string {
+	re := regexp.MustCompile(`[[:alnum:]]+`)
+	words := re.FindAllString(text, -1)
+	for i := range words {
+		words[i] = strings.ToLower(words[i])
+	}
+	return words
+}
+
 func single_threaded(files []string) {
 	// initializes a map which will keep track of strings and the number of occurences of that string
 	wordCounts := make(map[string]int)
-
-	// Function to clean and split text into words
-	cleanAndSplit := func(text string) []string {
-		re := regexp.MustCompile(`[[:alnum:]]+`)
-		words := re.FindAllString(text, -1)
-		for i := range words {
-			words[i] = strings.ToLower(words[i])
-		}
-		return words
-	}
 
 	// Process each file
 	for _, filePath := range files {
@@ -161,7 +161,7 @@ func main() {
 
 	files := read("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
-	// single_threaded(files)
-	multi_threaded(files)
+	single_threaded(files)
+	// multi_threaded(files)
 	// multi_threaded(files)
 }
