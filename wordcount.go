@@ -148,8 +148,9 @@ func multi_threaded(files []string) {
 func main() {
 	// TODO: add argument processing and run both single-threaded and multi-threaded functions
 
-	files := readFilesFromFolder("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input")
+	files := readFilesFromFolder("/Users/folder.amelia/Programming/CS343A1")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
+	// amelia path: "/Users/folder.amelia/Programming/CS343A1"
 	single_threaded(files)
 	// multi_threaded(files)
 	// multi_threaded(files)
