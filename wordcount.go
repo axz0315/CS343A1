@@ -152,6 +152,8 @@ func multi_threaded(files []string) {
 	fmt.Println(strings)
 	fmt.Println(len(strings))
 
+	//test
+
 }
 
 func main() {
