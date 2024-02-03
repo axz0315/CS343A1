@@ -67,7 +67,7 @@ func fillHashMap(words []string) {
 	}
 }
 
-func generateOutputFile() {
+func generateOutputFileSingle() {
 	// Sort the words alphabetically
 	var words []string
 	for word := range wordCount {
@@ -114,7 +114,7 @@ func single_threaded(files []string) {
 		}
 	}
 
-	generateOutputFile()
+	generateOutputFileSingle()
 }
 
 func multi_thread_action(text string) {
@@ -133,6 +133,26 @@ func multi_thread_action(text string) {
 	// Update word frequency count
 	for _, word := range words {
 		wordCount[word]++
+	}
+}
+
+func generateOutputFileMulti() {
+	// Sort the words alphabetically
+	var words []string
+	for word := range wordCount {
+		words = append(words, word)
+	}
+	sort.Strings(words)
+
+	// Write the word count to the output file
+	outputFile, err := os.Create("output/multi.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer outputFile.Close()
+
+	for _, word := range words {
+		outputFile.WriteString(fmt.Sprintf("%s %d\n", word, wordCount[word]))
 	}
 }
 
@@ -173,7 +193,7 @@ func multi_threaded(files []string) {
 	}
 
 	//run generate output file func last: use channels?
-	generateOutputFile()
+	generateOutputFileMulti()
 
 	//sleep for main to not exit before threds finish running?
 
