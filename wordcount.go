@@ -61,13 +61,6 @@ func cleanAndSplit(text string) []string {
 
 // critical
 func fillHashMap(words []string) {
-
-	// lock before accessing data
-	mut.Lock()
-
-	//defer until function finishes running
-	defer mut.Unlock()
-
 	// Update word frequency count
 	for _, word := range words {
 		wordCount[word]++
@@ -124,6 +117,25 @@ func single_threaded(files []string) {
 	generateOutputFile()
 }
 
+func multi_thread_action(text string) {
+	re := regexp.MustCompile(`[[:alnum:]]+`)
+	words := re.FindAllString(text, -1)
+	for i := range words {
+		words[i] = strings.ToLower(words[i])
+	}
+
+	// lock before accessing data
+	mut.Lock()
+
+	//defer until function finishes running
+	defer mut.Unlock()
+
+	// Update word frequency count
+	for _, word := range words {
+		wordCount[word]++
+	}
+}
+
 func multi_threaded(files []string) {
 	// Set the size of the string that each thread will handle
 	bytes_per_thread := int64(1250000)
@@ -152,28 +164,28 @@ func multi_threaded(files []string) {
 
 		}
 	}
-}
-
-func main() {
-	// TODO: add argument processing and run both single-threaded and multi-threaded functions
 
 	//for loop: [loop through len of threadInput] or # of times need to run through set of functions
 	threadCount := 0
 	for threadCount < len(threadInput) {
-		go cleanAndSplit(threadInput[threadCount])
-		go fillHashMap(threadInput) //putting words into HashMap
+		go multi_thread_action(threadInput[threadCount])
+		threadCount++
 	}
 
 	//run generate output file func last: use channels?
+	generateOutputFile()
 
 	//sleep for main to not exit before threds finish running?
 
 	//use pointer in functions?
 
-	files := readFilesFromFolder("/Users/folder.amelia/Programming/CS343A1")
+}
+
+func main() {
+	// TODO: add argument processing and run both single-threaded and multi-threaded functions
+	files := readFilesFromFolder("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/CS343A1/input")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// amelia path: "/Users/folder.amelia/Programming/CS343A1"
 	single_threaded(files)
-	// multi_threaded(files)
 	// multi_threaded(files)
 }
