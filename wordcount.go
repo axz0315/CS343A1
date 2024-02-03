@@ -17,6 +17,7 @@ var size = 0
 var wordCount = make(map[string]int)
 var threadInput []string //list of strings of bytes
 var mut sync.Mutex       //pointer because used in multiple go routines
+var wg sync.WaitGroup
 
 func readFilesFromFolder(path string) []string {
 	var files []string
@@ -124,16 +125,14 @@ func multi_thread_action(text string) {
 		words[i] = strings.ToLower(words[i])
 	}
 
-	// lock before accessing data
-	mut.Lock()
-
-	//defer until function finishes running
-	defer mut.Unlock()
-
 	// Update word frequency count
 	for _, word := range words {
+		// lock before accessing data
+		mut.Lock()
 		wordCount[word]++
+		mut.Unlock()
 	}
+	wg.Done() // tells the program that the thread is finished
 }
 
 func generateOutputFileMulti() {
@@ -188,14 +187,17 @@ func multi_threaded(files []string) {
 	//for loop: [loop through len of threadInput] or # of times need to run through set of functions
 	threadCount := 0
 	for threadCount < len(threadInput) {
+		wg.Add(1) // increment the waitgroup counter each time we add a thread
 		go multi_thread_action(threadInput[threadCount])
 		threadCount++
 	}
 
+	wg.Wait() // it should only continue once all the threads are done
+
 	//run generate output file func last: use channels?
 	generateOutputFileMulti()
 
-	//sleep for main to not exit before threds finish running?
+	//sleep for main to not exit before threads finish running?
 
 	//use pointer in functions?
 
@@ -206,6 +208,6 @@ func main() {
 	files := readFilesFromFolder("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/CS343A1/input")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// amelia path: "/Users/folder.amelia/Programming/CS343A1"
-	single_threaded(files)
-	// multi_threaded(files)
+	// single_threaded(files)
+	multi_threaded(files)
 }
