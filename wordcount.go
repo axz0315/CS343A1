@@ -9,12 +9,14 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 )
 
 var num_threads = 3
 var size = 0
 var wordCount = make(map[string]int)
-var threadInput []string
+var threadInput []string //list of strings of bytes
+var mut sync.Mutex       //pointer because used in multiple go routines
 
 func readFilesFromFolder(path string) []string {
 	var files []string
@@ -59,6 +61,13 @@ func cleanAndSplit(text string) []string {
 
 // critical
 func fillHashMap(words []string) {
+
+	// lock before accessing data
+	mut.Lock()
+
+	//defer until function finishes running
+	defer mut.Unlock()
+
 	// Update word frequency count
 	for _, word := range words {
 		wordCount[word]++
@@ -147,6 +156,19 @@ func multi_threaded(files []string) {
 
 func main() {
 	// TODO: add argument processing and run both single-threaded and multi-threaded functions
+
+	//for loop: [loop through len of threadInput] or # of times need to run through set of functions
+	threadCount := 0
+	for threadCount < len(threadInput) {
+		go cleanAndSplit(threadInput[threadCount])
+		go fillHashMap(threadInput) //putting words into HashMap
+	}
+
+	//run generate output file func last: use channels?
+
+	//sleep for main to not exit before threds finish running?
+
+	//use pointer in functions?
 
 	files := readFilesFromFolder("/Users/folder.amelia/Programming/CS343A1")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
