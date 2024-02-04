@@ -17,7 +17,8 @@ var wordCount = make(map[string]int)
 var threadInput []string //list of strings of bytes
 var mut sync.Mutex       //pointer because used in multiple go routines
 var wg sync.WaitGroup
-var bytes_per_thread = int64(1250000) // Set the size of the string that each thread will handle
+var bytes_per_thread = int64(1250000) // Set the size of the string that each thread will handle (1250000)
+var numThreads = 0
 
 func readFilesFromFolder(path string) []string {
 	var files []string
@@ -157,7 +158,8 @@ func multi_threaded(files []string) {
 
 		for i := 0; i < int(file.Size()); i += int(bytes_per_thread) {
 			wg.Add(1)
-			multi_thread_action(filePath, i)
+			numThreads += 1
+			go multi_thread_action(filePath, i)
 		}
 	}
 	wg.Wait() // it should only continue once all the threads are done
@@ -171,8 +173,9 @@ func main() {
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// amelia path: "/Users/folder.amelia/Programming/CS343A1"
 	// fmt.Print("Single\n")
-	single_threaded(files)
-	clear(wordCount)
-	// fmt.Print("\nMulti\n")
+	// single_threaded(files)
+	// clear(wordCount)
+	fmt.Print("\nMulti\n")
 	multi_threaded(files)
+	// fmt.Printf("Number of threads: %d\n", numThreads)
 }
