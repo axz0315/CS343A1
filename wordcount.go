@@ -157,7 +157,7 @@ func generateOutputFileMulti() {
 
 func multi_threaded(files []string) {
 	// Set the size of the string that each thread will handle
-	bytes_per_thread := int64(8) //1250000
+	bytes_per_thread := int64(1250000)
 
 	// Split the file into strings with size_per_thread bytes in each
 	for _, filePath := range files {
@@ -207,8 +207,9 @@ func main() {
 	files := readFilesFromFolder("/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/CS343A1/input")
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// amelia path: "/Users/folder.amelia/Programming/CS343A1"
-	fmt.Print("Single\n")
-	single_threaded(files)
+	// fmt.Print("Single\n")
+	// single_threaded(files)
+	// clear(wordCount)
 	fmt.Print("\nMulti\n")
 	multi_threaded(files)
 }
