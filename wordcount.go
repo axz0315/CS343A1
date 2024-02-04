@@ -12,7 +12,6 @@ import (
 	"sync"
 )
 
-var num_threads = 3
 var size = 0
 var wordCount = make(map[string]int)
 var threadInput []string //list of strings of bytes
