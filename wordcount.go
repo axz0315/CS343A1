@@ -18,6 +18,7 @@ var wordCount = make(map[string]int)
 var threadInput []string //list of strings of bytes
 var mut sync.Mutex       //pointer because used in multiple go routines
 var wg sync.WaitGroup
+var bytes_per_thread = int64(1250000) // Set the size of the string that each thread will handle
 
 func readFilesFromFolder(path string) []string {
 	var files []string
@@ -50,7 +51,6 @@ func readFilesFromFolder(path string) []string {
 }
 
 // Function to clean and split text into words
-// can happen at same time
 func cleanAndSplit(text string) []string {
 	re := regexp.MustCompile(`[[:alnum:]]+`)
 	words := re.FindAllString(text, -1)
@@ -60,7 +60,6 @@ func cleanAndSplit(text string) []string {
 	return words
 }
 
-// critical
 func fillHashMap(words []string) {
 	// Update word frequency count
 	for _, word := range words {
@@ -118,7 +117,21 @@ func single_threaded(files []string) {
 	generateOutputFileSingle()
 }
 
-func multi_thread_action(text string) {
+func multi_thread_action(file string, index int) {
+	myFile, err := os.Open(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	myFile.Seek(int64(index), 0)
+
+	buffer := make([]byte, bytes_per_thread)
+	n, err := myFile.Read(buffer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	text := string(buffer[:n])
 	re := regexp.MustCompile(`[[:alnum:]]+`)
 	words := re.FindAllString(text, -1)
 	for i := range words {
@@ -156,50 +169,21 @@ func generateOutputFileMulti() {
 }
 
 func multi_threaded(files []string) {
-	// Set the size of the string that each thread will handle
-	bytes_per_thread := int64(1250000)
-
 	// Split the file into strings with size_per_thread bytes in each
 	for _, filePath := range files {
-		Myfile, err := os.Open(filePath)
-		if err != nil {
-			fmt.Println(err)
-		}
 		file, err := os.Stat(filePath)
 		if err != nil {
 			log.Printf("Error with determining file %s: %v", filePath, err)
 		}
 
 		for i := 0; i < int(file.Size()); i += int(bytes_per_thread) {
-			Myfile.Seek(int64(i), 0)
-
-			buffer := make([]byte, bytes_per_thread)
-			n, err := Myfile.Read(buffer)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			threadInput = append(threadInput, string(buffer[:n]))
-
+			wg.Add(1)
+			multi_thread_action(filePath, i)
 		}
 	}
-
-	//for loop: [loop through len of threadInput] or # of times need to run through set of functions
-	threadCount := 0
-	for threadCount < len(threadInput) {
-		wg.Add(1) // increment the waitgroup counter each time we add a thread
-		go multi_thread_action(threadInput[threadCount])
-		threadCount++
-	}
-
 	wg.Wait() // it should only continue once all the threads are done
 	//run generate output file func last: use channels?
 	generateOutputFileMulti()
-
-	//sleep for main to not exit before threads finish running?
-
-	//use pointer in functions?
-
 }
 
 func main() {
