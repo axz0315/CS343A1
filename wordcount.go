@@ -67,7 +67,7 @@ func fillHashMap(words []string) {
 	}
 }
 
-func generateOutputFileSingle() {
+func generateOutputFile(filePath string) {
 	// Sort the words alphabetically
 	var words []string
 	for word := range wordCount {
@@ -76,7 +76,7 @@ func generateOutputFileSingle() {
 	sort.Strings(words)
 
 	// Write the word count to the output file
-	outputFile, err := os.Create("output/single.txt")
+	outputFile, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func single_threaded(files []string) {
 		}
 	}
 
-	generateOutputFileSingle()
+	generateOutputFile("output/single.txt")
 }
 
 func multi_thread_action(file string, index int) {
@@ -148,26 +148,6 @@ func multi_thread_action(file string, index int) {
 	wg.Done() // tells the program that the thread is finished
 }
 
-func generateOutputFileMulti() {
-	// Sort the words alphabetically
-	var words []string
-	for word := range wordCount {
-		words = append(words, word)
-	}
-	sort.Strings(words)
-
-	// Write the word count to the output file
-	outputFile, err := os.Create("output/multi.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer outputFile.Close()
-
-	for _, word := range words {
-		outputFile.WriteString(fmt.Sprintf("%s %d\n", word, wordCount[word]))
-	}
-}
-
 func multi_threaded(files []string) {
 	// Split the file into strings with size_per_thread bytes in each
 	for _, filePath := range files {
@@ -183,7 +163,7 @@ func multi_threaded(files []string) {
 	}
 	wg.Wait() // it should only continue once all the threads are done
 	//run generate output file func last: use channels?
-	generateOutputFileMulti()
+	generateOutputFile("output/multi.txt")
 }
 
 func main() {
@@ -192,8 +172,8 @@ func main() {
 	// bella path: "/Users/bellasteedly/Library/Mobile Documents/com~apple~CloudDocs/Academics/Year4/Semester2/CS343/Assignment1/starter/input"
 	// amelia path: "/Users/folder.amelia/Programming/CS343A1"
 	// fmt.Print("Single\n")
-	// single_threaded(files)
-	// clear(wordCount)
-	fmt.Print("\nMulti\n")
+	single_threaded(files)
+	clear(wordCount)
+	// fmt.Print("\nMulti\n")
 	multi_threaded(files)
 }
